@@ -21,7 +21,7 @@ params = { h0, W_hh, W_hx, W_yh, b_h, b_y };
 
 g = @tanh;
 Jg = @(x) diag(1 - tanh(x).^2);
-e = @(x) exp(x)/sum(exp(x));
+e = @(x) exp(x)/sum(exp(x)); % softmax
 Je = @(x) diag(exp(x)/sum(exp(x))) - exp(x)*exp(x)'/sum(exp(x))^2;
 
 % g = @(x) x;
@@ -32,12 +32,12 @@ Je = @(x) diag(exp(x)/sum(exp(x))) - exp(x)*exp(x)'/sum(exp(x))^2;
 [y_est,~,~,~] = rnn( x, params, g, e );
 L = XH(y,y_est);
 
-diff_params = cell(6,1);
+diff_params = cell(6,1); % the numerically computed gradients
 for i = 1:length(diff_params)
     diff_params{i} = zeros(size(params{i}));
 end
 
-dparams = bptt( x, y, params, g, e, Jg, Je, @dXH ); 
+dparams = bptt( x, y, params, g, e, Jg, Je, @dXH ); % the exact gradients
 
 eps = 1e-5;
 for t = 1:length(params)
