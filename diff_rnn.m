@@ -1,3 +1,6 @@
+% Numerically verify the correctness of my implementation of
+% backpropagation in time.  David Pfau, 2011
+
 n = 5;
 m = 3;
 k = 3;
