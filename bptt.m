@@ -15,7 +15,7 @@ function [dparams dt ds] = bptt( x, y, params, e, g, Je, Jg, dL, y_est, h, t, s 
 % David Pfau, 2011
 
 % Forward pass
-if nargin > 12
+if nargin < 12
     [y_est h t s] = rnn( x, params, e, g );
 end
 
@@ -30,19 +30,19 @@ ds = zeros(size(s));
 dtt = zeros(size(h0)); % dL/dt at the current time step
 for i = size(x,2):-1:1
     ds(:,i)  = Jg( s(:,i) )' * dL( y(:,i), y_est(:,i) ); % dL/ds
-    dW_yh = dW_yh + ds * h(:,i)';
-    db_y  = db_y  + ds;
+    dW_yh = dW_yh + ds(:,i) * h(:,i)';
+    db_y  = db_y  + ds(:,i);
     
     dt(:,i) = Je( t(:,i) )' * ( W_yh' * ds(:,i) + W_hh' * dtt );
     dtt = dt(:,i);
     if i > 1
-        dW_hh = dW_hh + dt * h(:,i-1)';
+        dW_hh = dW_hh + dtt * h(:,i-1)';
     else
-        dW_hh = dW_hh + dt * h0';
+        dW_hh = dW_hh + dtt * h0';
     end
-    dW_hx = dW_hx + dt * x(:,i)';
-    db_h = db_h + dt;
+    dW_hx = dW_hx + dtt * x(:,i)';
+    db_h = db_h + dtt;
 end
 
-dh0 = W_hh' * dt;
+dh0 = W_hh' * dtt;
 dparams = { dh0, dW_hh, dW_hx, dW_yh, db_h, db_y };
