@@ -53,5 +53,5 @@ while 1
         Hdot  = Hdot  + v_params{i}(:)'*Hparams{i}(:);
         GNdot = GNdot + v_params{i}(:)'*GNparams{i}(:);
     end
-    fprintf('True: %d, GN approx: %d\n',Hdot,GNdot);
+    fprintf('True: %d, GN approx: %d\n', celldot(v_params,Hparams), celldot(v_params,GNparams));
 end
