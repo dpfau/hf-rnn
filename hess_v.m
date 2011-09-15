@@ -63,5 +63,5 @@ for i = size(x,2):-1:1
     Rdtt = Rdt(:,i);
 end
 
-Rh0 = vW_hh' * dtt + W_hh' * Rdt(:,1);
+Rh0 = vW_hh' * dtt + W_hh' * Rdtt;
 Rparams = { Rh0, RW_hh, RW_hx, RW_yh, Rb_h, Rb_y };
