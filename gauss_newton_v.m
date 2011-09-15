@@ -1,4 +1,4 @@
-function [Rparams Ry Rh Rt Rs Rdh Rdt Rds] = gauss_newton_v( x, y, params, v_params, e, g, Je, Jg, He, Hg, dL, ddL )
+function [Rparams Ry Rh Rt Rs Rdh Rdt Rds] = gauss_newton_v( x, y, params, v_params, e, g, Je, Jg, Hg, dL, ddL )
 % Calculates the product of the Gauss-Newton approximation to the Hessian
 % of the error wrt the weights with an arbitrary vector v according to the 
 % method of Schraudolph 2002.
