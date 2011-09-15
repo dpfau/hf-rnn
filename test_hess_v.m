@@ -4,7 +4,7 @@
 n = 5;
 m = 3;
 k = 3;
-t = 1;
+t = 10;
 
 W_hh = 0.1 * randn(n);
 W_hx = randn(n,m);
@@ -26,7 +26,10 @@ Hg = @(x) diag_tensor(-2*tanh(x).*(1-tanh(x).^2),3);
 e = @(x) exp(x)/sum(exp(x)); % softmax
 Je = @(x) diag(exp(x)/sum(exp(x))) - exp(x)*exp(x)'/sum(exp(x))^2;
 He = @(x) 2*tprod( exp(x)*exp(x)', [1 2], exp(x), 3 )/sum(exp(x))^3 ...
-    ;
+    + diag_slice( -exp(x)*exp(x)'/sum(exp(x))^2, 1 ) ...
+    + diag_slice( -exp(x)*exp(x)'/sum(exp(x))^2, 2 ) ...
+    + diag_slice( -exp(x)*exp(x)'/sum(exp(x))^2, 3 ) ...
+    + diag_tensor(exp(x),3)/sum(exp(x));
 
 % g = @(x) x;
 % Jg = @(x) eye(length(x));

@@ -42,15 +42,16 @@ end
 Rdt = zeros(size(dt)); % R_v[dL/dt], where L is the loss
 Rds = zeros(size(ds));
 Rdh = zeros(size(dt));
-dtt = zeros(size(h0)); % dt at the current time step
+dtt = zeros(size(h0)); % dt one step in the future
+Rdtt = zeros(size(h0)); % Rdt one step in the future
 for i = size(x,2):-1:1
     Rds(:,i) = Jg( s(:,i) )' * ( ddL( y(:,i), y_est(:,i) ) .* Ry(:,i) ) + ...
        tprod( Hg( s(:,i) ), [2 1 -1], Rs(:,i), -1 ) * dL( y(:,i), y_est(:,i) ); % R_v[dL/ds]
     RW_yh = RW_yh + Rds(:,i) * h(:,i)' + ds(:,i) * Rh(:,i)';
     Rb_y  = Rb_y  + Rds(:,i);
     
-    Rdh(:,i) = ( W_hh' * Rdt(:,i) + vW_hh' * dtt ) + ( W_yh' * Rds(:,i) + vW_yh' * ds(:,i) );    
-    Rdt(:,i) = Je( t(:,i) )' * Rdh + tprod( He( t(:,i) ), [2 1 -1], Rt(:,i), -1 ) * ( W_yh' * ds(:,i) + W_hh' * dtt );
+    Rdh(:,i) = ( W_hh' * Rdtt + vW_hh' * dtt ) + ( W_yh' * Rds(:,i) + vW_yh' * ds(:,i) );    
+    Rdt(:,i) = Je( t(:,i) )' * Rdh(:,i) + tprod( He( t(:,i) ), [2 1 -1], Rt(:,i), -1 ) * ( W_yh' * ds(:,i) + W_hh' * dtt );
     if i > 1
         RW_hh = RW_hh + Rdt(:,i) * h(:,i-1)' + dt(:,i) * Rh(:,i-1)';
     else
@@ -59,6 +60,7 @@ for i = size(x,2):-1:1
     RW_hx = RW_hx + Rdt(:,i) * x(:,i)';
     Rb_h  = Rb_h + Rdt(:,i);
     dtt = dt(:,i);
+    Rdtt = Rdt(:,i);
 end
 
 Rh0 = vW_hh' * dtt + W_hh' * Rdt(:,1);
