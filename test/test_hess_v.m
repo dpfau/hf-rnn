@@ -38,8 +38,8 @@ He = @(x) 2*tprod( exp(x)*exp(x)', [1 2], exp(x), 3 )/sum(exp(x))^3 ...
 % Je = @(x) eye(length(x));
 % He = @(x) zeros(length(x),length(x),length(x));
 
-diff_params = cell(6,1); % the Hessian-vector product computed by difference of gradients
-v_params = cell(6,1); % the vector with which we multiply the Hessian
+diff_params = cell(1,6); % the Hessian-vector product computed by difference of gradients
+v_params = cell(1,6); % the vector with which we multiply the Hessian
 for i = 1:length(diff_params)
     diff_params{i} = zeros(size(params{i}));
     v_params{i} = randn(size(params{i}));
