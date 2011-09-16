@@ -1,4 +1,4 @@
-function params1 = conj_grad( params0, grad, hess_v, p0 )
+function x = conj_grad( x0, grad, hess_v, p0 )
 % Linear conjugate gradient ascent, for the inner loop of HF optimization
 % Minimizes 1/2*x'*A*x - b'*x
 % params0 - cell array with initial position of x
@@ -7,25 +7,28 @@ function params1 = conj_grad( params0, grad, hess_v, p0 )
 % p0 - cell array with initial search direction
 % params1 - final value of x
 
-params1 = params0;
-r0 = cellfun( @minus, grad, hess_v( params0 ), 'UniformOutput', 0 );
+x = x0;
+r = cellfun( @minus, grad, hess_v( x ), 'UniformOutput', 0 ); % residual
 if nargin < 4
-    p = r0;
+    p = cellfun( @(x) -x, r, 'UniformOutput', 0 );
 else
     p = p0;
 end
 
 i = 1;
-objs = zeros(10,1); % tracks the last several values of 1/2x'Ax - b'x
+objs = zeros(10,1);
 eps = 0.00005; % cutoff for rate of change of objective
 while 1
     Ap = hess_v( p );
-    a = celldot( r0, r0 ) / celldot( p, Ap );
-    params1 = cellfun( @(x,y) x + a*y, params1, p, 'UniformOutput', 0 );
+    pAp = celldot( p, Ap );
+    a = celldot( r, p ) / pAp;
+    x = cellfun( @(x,y) x + a*y, x, p, 'UniformOutput', 0 );
     
     % check if cutoff condition is met
-    obj = 1/2 * celldot( params1, hess_v( params1 ) ) - celldot( params1, grad );
-    fprintf( 'Obj = %d, Res = %d\n', obj, celldot(r0,r0) );
+    Ax = hess_v( x );
+    r = cellfun( @minus, grad, Ax, 'UniformOutput', 0 ); % Ax - b
+    obj = 1/2 * celldot( x, Ax ) - celldot( x, grad ); % 1/2x'Ax - b'x
+    fprintf( 'Obj = %d, Res = %d\n', obj, celldot( r, r ) );
     if i <= 10
         objs(i) = obj;
     else
@@ -39,10 +42,7 @@ while 1
             break;
         end
     end
-    
-    r1 = cellfun( @(x,y) x - a*y, r0, Ap, 'UniformOutput', 0 );
-    b = celldot( r1, r1 ) / celldot( r0, r0 );
-    p = cellfun( @(x,y) x + b*y, r1, p, 'UniformOutput', 0 );
-    r0 = r1;
+    b = celldot( r, Ap ) / pAp;
+    p = cellfun( @(x,y) -x + b*y, r, p, 'UniformOutput', 0 );
     i = i + 1;
 end
