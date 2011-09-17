@@ -26,4 +26,4 @@ f = @(params) XH( y, rnn( x, params, g, @SMX ) );
 grad = @(params) bptt( x, y, params, g, @SMX, Jg, @dSMX, @dXH );
 hess = @(params, v) gauss_newton_v( x, y, params, v, g, @SMX, Jg, @dSMX, @ddSMX, @dXH, @ddXH );
 
-params1 = hf_opt( params, f, grad, hess, 0, 100 );
+params1 = hf_opt( params, f, grad, hess, 1, 100 );

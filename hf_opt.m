@@ -17,7 +17,7 @@ x1 = x0;
 p = cellfun( @minus, grad( x0 ), hess_v( x0, x0 ), 'UniformOutput', 0 ); % residual
 for i = 1:maxiters
     b = cellfun( @(x) -x, grad( x1 ), 'UniformOutput', 0 );
-    A = @(v) cellfun( @(x) x + lambda * ones(size(x)), hess_v( x1, v ), 'UniformOutput', 0 ); % Hessian-vector multiplication with uniform damping
+    A = @(v) cellfun( @(x,y) x + lambda * y, hess_v( x1, v ), v, 'UniformOutput', 0 ); % Hessian-vector multiplication with uniform damping
     [dx p q] = conj_grad( z, b, A, p );
     x = cellfun( @(x,y) x + y, x1, dx, 'UniformOutput', 0 );
     
