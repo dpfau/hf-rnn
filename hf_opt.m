@@ -12,15 +12,17 @@ function x = hf_opt( x0, f, grad, hess_v, lambda, maxiters )
 %
 % David Pfau, 2011
 
+z = cellfun( @(x) zeros(size(x)), x0, 'UniformOutput', 0 );
 x1 = x0;
 p = cellfun( @minus, grad( x0 ), hess_v( x0, x0 ), 'UniformOutput', 0 ); % residual
 for i = 1:maxiters
     b = cellfun( @(x) -x, grad( x1 ), 'UniformOutput', 0 );
     A = @(v) cellfun( @(x) x + lambda * ones(size(x)), hess_v( x1, v ), 'UniformOutput', 0 ); % Hessian-vector multiplication with uniform damping
-    [dx p q] = conj_grad( cellfun( @(x) zeros(size(x)), 'UniformOutput', 0 ), b, A, p );
+    [dx p q] = conj_grad( z, b, A, p );
     x = cellfun( @(x,y) x + y, x1, dx, 'UniformOutput', 0 );
     
     rho = ( f( x ) - f( x1 ) ) / q;
+    fprintf('f(x) = %d, rho = %d\n', f(x), rho );
     if rho > 3/4
         lambda = lambda * 2/3;
     elseif rho < 1/4
@@ -29,7 +31,7 @@ for i = 1:maxiters
     x1 = x;
 end
 
-function [x p obj] = conj_grad( x0, grad, hess_v, p0 )
+function [x p obj] = conj_grad( x0, grad, hess_v, p0, mode )
 % Linear conjugate gradient ascent, for the inner loop of HF optimization
 % Minimizes 1/2*x'*A*x - b'*x
 % params0 - cell array with initial position of x
@@ -56,7 +58,9 @@ while 1
     Ax = hess_v( x );
     r = cellfun( @minus, grad, Ax, 'UniformOutput', 0 ); % Ax - b
     obj = 1/2 * celldot( x, Ax ) - celldot( x, grad ); % 1/2x'Ax - b'x
-    fprintf( 'Obj = %d, Res = %d\n', obj, celldot( r, r ) );
+    if nargin > 4 && strcmp( mode, 'verbose' )
+        fprintf( 'Obj = %d, Res = %d\n', obj, celldot( r, r ) );
+    end
     if i <= 10
         objs(i) = obj;
     else
