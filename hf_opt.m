@@ -1,12 +1,12 @@
-function x = hf_opt( x0, f, grad, hess_v, lambda, maxiters )
+function x = hf_opt( x0, f, grad, hess_v, lambda, mu, maxiters )
 % Hessian-free optimization of the function f starting at x0
 % x0 - initial value of optimization (for example, current weights of a NN)
 % f  - function we are trying to minimize, for example @(x) L(rnn(a,x),b)
 %      where L is loss function of RNN, rnn(a,x) gives estimate of b with
 %      input a and weights x, and b is true output we are trying to match
 % grad(x) - the gradient of f at x
-% hess_v(x,v) - the Hessian at x multiplied by v (or approximation, as the
-%               case may be)
+% hess_v(x,v,lm) - the Hessian at x multiplied by v with damping parameter
+%                  lm (or approximation, as the case may be)
 % lambda - the damping parameter, which we update heuristically
 % maxiters - the number of iterations we run the optimization for
 %
@@ -14,10 +14,10 @@ function x = hf_opt( x0, f, grad, hess_v, lambda, maxiters )
 
 z = cellfun( @(x) zeros(size(x)), x0, 'UniformOutput', 0 );
 x1 = x0;
-p = cellfun( @minus, grad( x0 ), hess_v( x0, x0 ), 'UniformOutput', 0 ); % residual
+p = cellfun( @minus, grad( x0 ), hess_v( x0, x0, lambda*mu ), 'UniformOutput', 0 ); % residual
 for i = 1:maxiters
     b = cellfun( @(x) -x, grad( x1 ), 'UniformOutput', 0 );
-    A = @(v) cellfun( @(x,y) x + lambda * y, hess_v( x1, v ), v, 'UniformOutput', 0 ); % Hessian-vector multiplication with uniform damping
+    A = @(v) cellfun( @(x,y) x + lambda * y, hess_v( x1, v, lambda*mu ), v, 'UniformOutput', 0 ); % Hessian-vector multiplication with uniform damping
     [dx p q] = conj_grad( z, b, A, p );
     x = cellfun( @(x,y) x + y, x1, dx, 'UniformOutput', 0 );
     

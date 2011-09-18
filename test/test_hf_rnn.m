@@ -1,8 +1,8 @@
 % Run Hessian-free optimization for a random RNN.  David Pfau, 2011
 
-n = 5;
-m = 3;
-k = 3;
+n = 100;
+m = 10;
+k = 10;
 t = 10;
 
 W_hh = 0.1 * randn(n);
@@ -24,6 +24,6 @@ Jg = @(x) diag(1 - tanh(x).^2);
 
 f = @(params) XH( y, rnn( x, params, g, @SMX ) );
 grad = @(params) bptt( x, y, params, g, @SMX, Jg, @dSMX, @dXH );
-hess = @(params, v) gauss_newton_v( x, y, params, v, g, @SMX, Jg, @dSMX, @ddSMX, @dXH, @ddXH );
+hess = @(params, v, lm) gn_struct_v( x, y, params, v, g, @SMX, Jg, @dSMX, @ddSMX, @dXH, @ddXH, lm );
 
-params1 = hf_opt( params, f, grad, hess, 1, 100 );
+params1 = hf_opt( params, f, grad, hess, 1, 0.1, 100 );
